@@ -23,6 +23,7 @@
 #include "transient.h"
 #include "rtm.h"
 #include "debug.h"
+
 //#pragma optimize("gt", on)
 #include <stdio.h>
 #include <sys/reg.h>
@@ -53,14 +54,27 @@ void mask (void *adrs, size_t malicious_x){
 	//size_t training_x, x;
 	//register uint64_t time1, time2;
     mix_i=0;
+    int loop_count = 320;
     info("Is prob");
     //training_x = FORESHADOW_ZERO_RETRIES % 64;    
 	for (j = 29; j >= 0; j--)
 	{
-		for (volatile int z = 0; z < 320; z++)  
-		{
+            
+
+    
+        asm volatile(
+            "mov %[loop_count], %%ecx \n\t"  // Move loop_count into ECX register
+            "my_loop: \n\t"
+            "    dec %%ecx \n\t"            // Decrement ECX (counter)
+            "    jnz my_loop \n\t"          // Jump to my_loop if ECX is not zero
+            : [loop_count] "+r" (loop_count) // Output/input operand (read and updated by the loop)
+            :                               // No input operands
+            : "%ecx"                        // Clobbered registers
+        );
+		//for (volatile int z = 0; z < 320; z++)  
+		//{
             //transient_access(fs_oracle, adrs, SLOT_SIZE);
-		}
+		//}
         /* Bit twiddling to set x=training_x if j%6!=0 or malicious_x if j%6==0 */
 		/* Avoid jumps in case those tip off the branch predictor */
 		//x = ((j % 6) - 1) & ~0xFFFF; /* Set x=FFF.FF0000 if j%6==0, else x=0 */
