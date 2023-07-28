@@ -54,7 +54,7 @@ void mask (void *adrs, size_t malicious_x){
 	//size_t training_x, x;
 	//register uint64_t time1, time2;
     mix_i=0;
-    int loop_count = 320;
+    int loop_count = 3300;
     info("Is prob");
     //training_x = FORESHADOW_ZERO_RETRIES % 64;    
 	for (j = 29; j >= 0; j--)
