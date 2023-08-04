@@ -1,4 +1,3 @@
 # Modded-Foreshadow
 
-foreshadow.c is the attempt to use Spectre with C code
-foreshadowA1.c is the attempt to use Spectre with ASM code
+Make sure that you set the SGX_STEP_TIMER_INTERVAL to 150
