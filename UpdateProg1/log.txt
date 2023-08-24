@@ -1,0 +1,50 @@
+
+Total count of valid sets: 9 
+counter is at  200
+average access time is  155
+average successful access time is  138
+
+Total count of valid sets: 17 
+counter is at  200
+average access time is  154
+average successful access time is  130
+
+Total count of valid sets: 8 
+counter is at  200
+average access time is  156
+average successful access time is  120
+
+Total count of valid sets: 12 
+counter is at  200
+average access time is  154
+average successful access time is  119
+
+Total count of valid sets: 13 
+counter is at  200
+average access time is  155
+average successful access time is  110
+
+Total count of valid sets: 10 
+counter is at  200
+average access time is  155
+average successful access time is  127
+
+Total count of valid sets: 14 
+counter is at  200
+average access time is  156
+average successful access time is  134
+
+Total count of valid sets: 21 
+counter is at  200
+average access time is  156
+average successful access time is  120
+
+Total count of valid sets: 9 
+counter is at  200
+average access time is  154
+average successful access time is  139
+
+Total count of valid sets: 12 
+counter is at  200
+average access time is  154
+average successful access time is  115
